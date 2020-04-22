@@ -53,10 +53,10 @@ def lfa_to_nfa(lfa):
                         break
                 else:  # daca functia de tranzitie e aceeasi pt toate literele din alfabet
                     inlocuire[j] = inlocuire[i]
-    #print(inlocuire)
+    # print(inlocuire)
     # returnam automatul si renumerotam stariile
     Q = []
-    #print(tranzition)
+    # print(tranzition)
     co = 0
     renumerotare = []
     for i in range(automat[0]):
@@ -71,14 +71,43 @@ def lfa_to_nfa(lfa):
                 for k in tranzition[j][i]:
                     if inlocuire[k] not in Q[-1][j]:
                         Q[-1][j].append(inlocuire[k] - renumerotare[inlocuire[k]])
-    #print(Q)
-    #recalculam starile finale dupa eliminare noduri si renumerotare
+    # print(Q)
+    # recalculam starile finale dupa eliminare noduri si renumerotare
     for i in finale:
-        if inlocuire[i]!=i:
+        if inlocuire[i] != i:
             finale.pop(finale.index(i))
     for i in range(len(finale)):
         finale[i] = finale[i] - renumerotare[finale[i]]
-    return [automat[0]-renumerotare[automat[0]-1], alfabet, Q, automat[3]-renumerotare[automat[3]],finale]
+    return [automat[0] - renumerotare[automat[0] - 1], alfabet, Q, automat[3] - renumerotare[automat[3]], finale]
+
+
+def nfa_to_dfa(automat):
+    # comasat pasii 2.1 si 2.3
+    stari = {tuple([i]): i for i in range(automat[0])}
+    Q = [{j: [] for j in alfabet} for i in range(nrStari)]
+    for i in range(automat[0]):
+        for ch in automat[1]:
+            ls = automat[2][i][ch]
+            if len(ls)>1:
+                #stari[tuple(ls)] = len(stari)
+                Q.append({j: [] for j in alfabet})
+                for i in ls:
+                    for j in Q[i][ch]:
+                        if j not in Q[tuple(ls)][ch]:
+                            Q[tuple(ls)][ch].append(j)
+                Q[i][ch] =
+            else:
+                Q[i][ch]=ls
+
+    # pasul 2.2
+    finale = []
+    for i in stari:
+        for j in i:
+            if j in automat[4]:
+                finale.append(stari[i])
+                break
+    print(stari)
+    return [len(stari),automat[1],]
 
 
 fin = open("automat.in")
@@ -106,3 +135,4 @@ automat = [nrStari, alfabet, Q, stare0, finale]
 
 automat = lfa_to_nfa(automat)
 print(automat)
+automat = nfa_to_dfa(automat)
