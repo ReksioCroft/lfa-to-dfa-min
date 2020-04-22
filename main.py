@@ -1,3 +1,6 @@
+import queue
+
+
 def lfa_to_nfa(lfa):
     def dfs(Nod):
         v.append(Nod)
@@ -82,14 +85,53 @@ def lfa_to_nfa(lfa):
 
 
 def nfa_to_dfa(automat):
+    q = queue.Queue()
+    q.put([automat[3]])
+    Q = [{i: [] for i in automat[1]}]
+    # vizitat = [automat[3]]
+    denumiri = {tuple([automat[3]]): 0}
+    while q.empty() == False:
+        nod0 = q.get()
+
+        #    denumiri[tuple(nod)] = len(denumiri)
+        #  for i in range(len(Q), len(denumiri) + 1):
+        #       Q.append({j: [] for j in automat[1]})
+        #  if len(nod) == 1:
+        for ch in automat[1]:
+            ls = []
+            for nod in nod0:
+                for i in automat[2][nod][ch]:
+                    if i not in ls:
+                        ls.append(i)
+                # ls = automat[2][nod][ch]
+            if len(ls)>0:
+                if tuple(ls) not in denumiri:  # inseamna ca nu l-am vizitat, deci ii dam un nume si il bagam in coada
+                    denumiri[tuple(ls)] = len(denumiri)
+                    for i in range(len(Q), len(denumiri) + 1):  # ma asigur sa aloc suicient spatiu pt noile noduri
+                        Q.append({j: [] for j in automat[1]})
+                    q.put(ls)
+                if denumiri[tuple(ls)] not in Q[nod][ch]:
+                   Q[denumiri[tuple(nod0)]][ch].append(denumiri[tuple(ls)])
+
+    #calculare stari finale
+    finale = []
+    for i in denumiri:
+        for j in i:
+            if j in automat[4]:
+                finale.append(denumiri[i])
+                break
+    return [len(denumiri),automat[1],Q,0,finale]
+
+"""
+def nfa_to_dfa_incercare(automat):
     # comasat pasii 2.1 si 2.3
-    stari = {tuple([i]): i for i in range(automat[0])}
+    denumiri = {tuple([i]): i for i in range(automat[0])}
     Q = [{j: [] for j in alfabet} for i in range(nrStari)]
     for i in range(automat[0]):
         for ch in automat[1]:
             ls = automat[2][i][ch]
-            if len(ls)>1:
-                #stari[tuple(ls)] = len(stari)
+            if len(ls) > 1:
+                denumiri[tuple(ls)] = len(denumiri)
                 Q.append({j: [] for j in alfabet})
                 for i in ls:
                     for j in Q[i][ch]:
@@ -97,7 +139,7 @@ def nfa_to_dfa(automat):
                             Q[tuple(ls)][ch].append(j)
                 Q[i][ch] =
             else:
-                Q[i][ch]=ls
+                Q[i][ch] = ls
 
     # pasul 2.2
     finale = []
@@ -107,8 +149,8 @@ def nfa_to_dfa(automat):
                 finale.append(stari[i])
                 break
     print(stari)
-    return [len(stari),automat[1],]
-
+    return [len(stari), automat[1], ]
+"""
 
 fin = open("automat.in")
 nrStari = int(fin.readline())
@@ -136,3 +178,4 @@ automat = [nrStari, alfabet, Q, stare0, finale]
 automat = lfa_to_nfa(automat)
 print(automat)
 automat = nfa_to_dfa(automat)
+print(automat)
