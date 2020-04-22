@@ -13,8 +13,28 @@ def lfa_to_nfa(lfa):
         lClosure.append(v)
     # print(lClosure)
 
-    #1.2 Calculam functia de tranzitie
+    # 1.2 Calculam functia de tranzitie
+    tranzition = {i:[] for i in alfabet if i != '$'}
+    for ch in automat[1]:
+      #  print()
+        if ch != "$":
+            for i in range(automat[0]):
+                v = []
+                for j in lClosure[i]:
+                    for nod in automat[2][j][ch]:
+                        if nod not in v:
+                            v.append(nod)
 
+                ls = []
+                for j in v:
+                    for nod in lClosure[j]:
+                        if nod not in ls:
+                            ls.append(nod)
+               # print(sorted(ls))
+                tranzition[ch].append(sorted(ls))
+
+    print(tranzition)
+    return
 
 
 fin = open("automat.in")
