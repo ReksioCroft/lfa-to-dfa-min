@@ -14,26 +14,38 @@ def lfa_to_nfa(lfa):
     # print(lClosure)
 
     # 1.2 Calculam functia de tranzitie
-    tranzition = {i:[] for i in alfabet if i != '$'}
-    for ch in automat[1]:
-      #  print()
-        if ch != "$":
-            for i in range(automat[0]):
-                v = []
-                for j in lClosure[i]:
-                    for nod in automat[2][j][ch]:
-                        if nod not in v:
-                            v.append(nod)
+    alfabet = automat[1]
+    alfabet.pop(alfabet.index("$"))
+    # print(alfabet)
+    tranzition = {i: [] for i in alfabet if i != '$'}
+    for ch in alfabet:
+        #  print()
+        for i in range(automat[0]):
+            v = []
+            for j in lClosure[i]:
+                for nod in automat[2][j][ch]:
+                    if nod not in v:
+                        v.append(nod)
 
-                ls = []
-                for j in v:
-                    for nod in lClosure[j]:
-                        if nod not in ls:
-                            ls.append(nod)
-               # print(sorted(ls))
-                tranzition[ch].append(sorted(ls))
+            ls = []
+            for j in v:
+                for nod in lClosure[j]:
+                    if nod not in ls:
+                        ls.append(nod)
+            # print(sorted(ls))
+            tranzition[ch].append(sorted(ls))
 
-    print(tranzition)
+    # print(tranzition)
+    # Pasul 1.3: Calculam starile finale
+    finale = []
+    for i in range(automat[0]):
+        for j in lClosure[i]:
+            if j in automat[4]:
+                finale.append(i)
+                break
+    # print(finale)
+    # Pasul 1.4: Eliminarea starilor redundante
+
     return
 
 
