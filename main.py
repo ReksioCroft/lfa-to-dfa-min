@@ -17,7 +17,7 @@ def lfa_to_nfa(lfa):
     alfabet = automat[1]
     alfabet.pop(alfabet.index("$"))
     # print(alfabet)
-    tranzition = {i: [] for i in alfabet if i != '$'}
+    tranzition = {i: [] for i in alfabet}
     for ch in alfabet:
         #  print()
         for i in range(automat[0]):
@@ -26,7 +26,6 @@ def lfa_to_nfa(lfa):
                 for nod in automat[2][j][ch]:
                     if nod not in v:
                         v.append(nod)
-
             ls = []
             for j in v:
                 for nod in lClosure[j]:
@@ -45,15 +44,49 @@ def lfa_to_nfa(lfa):
                 break
     # print(finale)
     # Pasul 1.4: Eliminarea starilor redundante
+    inlocuire = {i: i for i in range(automat[0])}
+    for i in range(automat[0]):
+        for j in range(i + 1, automat[0]):
+            if (i in finale) == (j in finale):
+                for ch in alfabet:
+                    if tranzition[ch][i] != tranzition[ch][j]:
+                        break
+                else:  # daca functia de tranzitie e aceeasi pt toate literele din alfabet
+                    inlocuire[j] = inlocuire[i]
+    #print(inlocuire)
+    # returnam automatul si renumerotam stariile
+    Q = []
+    #print(tranzition)
+    co = 0
+    renumerotare = []
+    for i in range(automat[0]):
+        if inlocuire[i] != i:
+            co += 1
+        renumerotare.append(co)
 
-    return
+    for i in range(automat[0]):
+        if inlocuire[i] == i:
+            Q.append({j: [] for j in alfabet})
+            for j in alfabet:
+                for k in tranzition[j][i]:
+                    if inlocuire[k] not in Q[-1][j]:
+                        Q[-1][j].append(inlocuire[k] - renumerotare[inlocuire[k]])
+    #print(Q)
+    #recalculam starile finale dupa eliminare noduri si renumerotare
+    for i in finale:
+        if inlocuire[i]!=i:
+            finale.pop(finale.index(i))
+    for i in range(len(finale)):
+        finale[i] = finale[i] - renumerotare[finale[i]]
+    return [automat[0]-renumerotare[automat[0]-1], alfabet, Q, automat[3]-renumerotare[automat[3]],finale]
 
 
 fin = open("automat.in")
 nrStari = int(fin.readline())
 fin.readline()
 alfabet = fin.readline().split()
-alfabet.append("$")
+if "$" not in alfabet:
+    alfabet.append("$")
 stare0 = int(fin.readline())
 fin.readline()
 finale = [int(x) for x in fin.readline().split()]
@@ -72,3 +105,4 @@ fin.close()
 automat = [nrStari, alfabet, Q, stare0, finale]
 
 automat = lfa_to_nfa(automat)
+print(automat)
