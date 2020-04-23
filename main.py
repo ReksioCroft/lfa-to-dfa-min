@@ -14,15 +14,14 @@ def lfa_to_nfa(lfa):
         v = []
         dfs(nod)
         lClosure.append(v)
-    # print(lClosure)
 
     # 1.2 Calculam functia de tranzitie
     alfabet = automat[1]
     alfabet.pop(alfabet.index("$"))
-    # print(alfabet)
+
     tranzition = {i: [] for i in alfabet}
     for ch in alfabet:
-        #  print()
+
         for i in range(automat[0]):
             v = []
             for j in lClosure[i]:
@@ -34,10 +33,9 @@ def lfa_to_nfa(lfa):
                 for nod in lClosure[j]:
                     if nod not in ls:
                         ls.append(nod)
-            # print(sorted(ls))
+
             tranzition[ch].append(sorted(ls))
 
-    # print(tranzition)
     # Pasul 1.3: Calculam starile finale
     finale = []
     for i in range(automat[0]):
@@ -45,7 +43,7 @@ def lfa_to_nfa(lfa):
             if j in automat[4]:
                 finale.append(i)
                 break
-    # print(finale)
+
     # Pasul 1.4: Eliminarea starilor redundante
     inlocuire = {i: i for i in range(automat[0])}
     for i in range(automat[0]):
@@ -56,10 +54,10 @@ def lfa_to_nfa(lfa):
                         break
                 else:  # daca functia de tranzitie e aceeasi pt toate literele din alfabet
                     inlocuire[j] = inlocuire[i]
-    # print(inlocuire)
+
     # returnam automatul si renumerotam stariile
     Q = []
-    # print(tranzition)
+
     co = 0
     renumerotare = []
     for i in range(automat[0]):
@@ -74,7 +72,7 @@ def lfa_to_nfa(lfa):
                 for k in tranzition[j][i]:
                     if inlocuire[k] not in Q[-1][j]:
                         Q[-1][j].append(inlocuire[k] - renumerotare[inlocuire[k]])
-    # print(Q)
+
     # recalculam starile finale dupa eliminare noduri si renumerotare
     for i in finale:
         if inlocuire[i] != i:
@@ -89,7 +87,7 @@ def nfa_to_dfa(automat):
     q = queue.Queue()
     q.put([automat[3]])
     Q = [{i: [] for i in automat[1]}]
-    # vizitat = [automat[3]]
+
     denumiri = {tuple([automat[3]]): 0}
     while q.empty() == False:
         nod0 = q.get()
@@ -121,13 +119,13 @@ def nfa_to_dfa(automat):
 
 def min_dfa(automat):
     echiv = [[True for j in range(i)] for i in range(automat[0])]
-    # print(echiv)
+
     for i in range(automat[0]):
         for j in range(i):
             if (i in automat[4]) != (j in automat[4]):
                 echiv[i][j] = False
     ok = True
-    #print(automat[2])
+
     while ok == True:
         ok = False
         for i in range(automat[0]):
@@ -139,7 +137,7 @@ def min_dfa(automat):
                             (i1 > j1 and echiv[i1][j1] == False) or (j1 > i1 and echiv[j1][i1] == False)):
                         echiv[i][j] = False
                         ok = True
-    #print(echiv)
+
     # Pasul 3.2: Grupare stari echivalente
     grupari = {i: i for i in range(automat[0])}
     for i in range(automat[0]):
@@ -150,14 +148,12 @@ def min_dfa(automat):
                 else:
                     grupari[j] = grupari[i]
     ls = [grupari[i] for i in range(automat[0]) if i == grupari[i]]
-    #print(ls)
 
     # calculare functie tranzitie
     Q = [{ch: [] for ch in automat[1]} for i in range(automat[0])]
     for i in ls:
         for ch in automat[1]:
             Q[i][ch] = grupari[automat[2][i][ch][0]]
-    #print(Q)
     # stari initiale si finale
     stare0 = grupari[automat[3]]
 
@@ -182,7 +178,6 @@ def min_dfa(automat):
     for i in ls:
         if dfsFinale(i, [False for j in range(automat[0])]) == False:
             ls.pop(ls.index(i))
-    #print(ls)
 
     # eliminare stari neaccesibile
     def dfsVizitari(nod, vizitat):
@@ -194,10 +189,10 @@ def min_dfa(automat):
     vizitat = [False for i in range(automat[0])]
     dfsVizitari(stare0, vizitat)
     for i in range(automat[0]):
-        if i in ls and vizitat[i]==False:
+        if i in ls and vizitat[i] == False:
             ls.pop(ls.index(i))
-    #print(ls)
-    #renumerotare
+
+    # renumerotare
     co = 0
     numerotare = []
     for i in range(automat[0]):
@@ -205,29 +200,25 @@ def min_dfa(automat):
             co += 1
         numerotare.append(co)
 
-    #print(ls)
-    #print(Q)
     Q2 = []
     for i in range(len(Q)):
         if i in ls:
-            Q2.append({ch:[] for ch in automat[1]})
+            Q2.append({ch: [] for ch in automat[1]})
             for ch in automat[1]:
                 if Q[i][ch] in ls:
                     Q2[-1][ch] = [Q[i][ch]]
     for i in range(len(ls)):
         ls[i] -= numerotare[ls[i]]
-    #print(Q2)
-    #print(numerotare)
+
     for i in range(len(Q2)):
         for ch in automat[1]:
-            if len(Q2[i][ch])>0:
-                Q2[i][ch][0] -= numerotare[ Q2[i][ch][0]]
-    #print(Q2)
-    #print(ls)
-    stare0-=numerotare[stare0]
+            if len(Q2[i][ch]) > 0:
+                Q2[i][ch][0] -= numerotare[Q2[i][ch][0]]
+
+    stare0 -= numerotare[stare0]
     for i in range(len(finale)):
-        finale[i]-=numerotare[finale[i]]
-    return [len(ls), automat[1],Q2,stare0,finale]
+        finale[i] -= numerotare[finale[i]]
+    return [len(ls), automat[1], Q2, stare0, finale]
 
 
 fin = open("automat.in")
