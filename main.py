@@ -124,10 +124,10 @@ def min_dfa(automat):
     # print(echiv)
     for i in range(automat[0]):
         for j in range(i):
-            if ( i in automat[4] ) != ( j in automat[4] ):
+            if (i in automat[4]) != (j in automat[4]):
                 echiv[i][j] = False
     ok = True
-    print(automat[2])
+    #print(automat[2])
     while ok == True:
         ok = False
         for i in range(automat[0]):
@@ -139,9 +139,95 @@ def min_dfa(automat):
                             (i1 > j1 and echiv[i1][j1] == False) or (j1 > i1 and echiv[j1][i1] == False)):
                         echiv[i][j] = False
                         ok = True
+    #print(echiv)
+    # Pasul 3.2: Grupare stari echivalente
+    grupari = {i: i for i in range(automat[0])}
+    for i in range(automat[0]):
+        for j in range(i):
+            if echiv[i][j] == True:
+                if grupari[i] == i:
+                    grupari[i] = grupari[j]
+                else:
+                    grupari[j] = grupari[i]
+    ls = [grupari[i] for i in range(automat[0]) if i == grupari[i]]
+    #print(ls)
 
-    print(echiv)
-    return
+    # calculare functie tranzitie
+    Q = [{ch: [] for ch in automat[1]} for i in range(automat[0])]
+    for i in ls:
+        for ch in automat[1]:
+            Q[i][ch] = grupari[automat[2][i][ch][0]]
+    #print(Q)
+    # stari initiale si finale
+    stare0 = grupari[automat[3]]
+
+    finale = []
+    for i in range(len(grupari)):
+        if i in automat[4]:
+            nr = grupari[i]
+            if nr not in finale:
+                finale.append(nr)
+
+    # eliminare stari dead-end
+    def dfsFinale(nod, vizitat):
+        if nod in finale:
+            return True
+        ok = False
+        vizitat[nod] = True
+        for ch in automat[1]:
+            if vizitat[Q[nod][ch]] == False:
+                ok = ok or dfsFinale(Q[nod][ch], vizitat)
+        return ok
+
+    for i in ls:
+        if dfsFinale(i, [False for j in range(automat[0])]) == False:
+            ls.pop(ls.index(i))
+    #print(ls)
+
+    # eliminare stari neaccesibile
+    def dfsVizitari(nod, vizitat):
+        vizitat[nod] = True
+        for ch in automat[1]:
+            if vizitat[Q[nod][ch]] == False:
+                dfsVizitari(Q[nod][ch], vizitat)
+
+    vizitat = [False for i in range(automat[0])]
+    dfsVizitari(stare0, vizitat)
+    for i in range(automat[0]):
+        if i in ls and vizitat[i]==False:
+            ls.pop(ls.index(i))
+    #print(ls)
+    #renumerotare
+    co = 0
+    numerotare = []
+    for i in range(automat[0]):
+        if i not in ls:
+            co += 1
+        numerotare.append(co)
+
+    #print(ls)
+    #print(Q)
+    Q2 = []
+    for i in range(len(Q)):
+        if i in ls:
+            Q2.append({ch:[] for ch in automat[1]})
+            for ch in automat[1]:
+                if Q[i][ch] in ls:
+                    Q2[-1][ch] = [Q[i][ch]]
+    for i in range(len(ls)):
+        ls[i] -= numerotare[ls[i]]
+    #print(Q2)
+    #print(numerotare)
+    for i in range(len(Q2)):
+        for ch in automat[1]:
+            if len(Q2[i][ch])>0:
+                Q2[i][ch][0] -= numerotare[ Q2[i][ch][0]]
+    #print(Q2)
+    #print(ls)
+    stare0-=numerotare[stare0]
+    for i in range(len(finale)):
+        finale[i]-=numerotare[finale[i]]
+    return [len(ls), automat[1],Q2,stare0,finale]
 
 
 fin = open("automat.in")
