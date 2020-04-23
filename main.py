@@ -253,8 +253,8 @@ fin.close()
 
 automat = [nrStari, alfabet, Q, stare0, finale]
 
-# print(automat)
-# automat = lfa_to_nfa(automat)
+print(automat)
+automat = lfa_to_nfa(automat)
 print(automat)
 automat = nfa_to_dfa(automat)
 print(automat)
