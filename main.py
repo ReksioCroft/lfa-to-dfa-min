@@ -114,7 +114,34 @@ def nfa_to_dfa(automat):
             if j in automat[4]:
                 finale.append(denumiri[i])
                 break
+    if "$" in automat[1]:
+        automat[1].pop(automat[1].index("$"))
     return [len(denumiri), automat[1], Q, 0, finale]
+
+
+def min_dfa(automat):
+    echiv = [[True for j in range(i)] for i in range(automat[0])]
+    # print(echiv)
+    for i in range(automat[0]):
+        for j in range(i):
+            if ( i in automat[4] ) != ( j in automat[4] ):
+                echiv[i][j] = False
+    ok = True
+    print(automat[2])
+    while ok == True:
+        ok = False
+        for i in range(automat[0]):
+            for j in range(i):
+                for ch in automat[1]:
+                    i1 = automat[2][i][ch][0]
+                    j1 = automat[2][j][ch][0]
+                    if echiv[i][j] == True and (
+                            (i1 > j1 and echiv[i1][j1] == False) or (j1 > i1 and echiv[j1][i1] == False)):
+                        echiv[i][j] = False
+                        ok = True
+
+    print(echiv)
+    return
 
 
 fin = open("automat.in")
@@ -140,7 +167,10 @@ fin.close()
 
 automat = [nrStari, alfabet, Q, stare0, finale]
 
-automat = lfa_to_nfa(automat)
+# print(automat)
+# automat = lfa_to_nfa(automat)
 print(automat)
 automat = nfa_to_dfa(automat)
+print(automat)
+automat = min_dfa(automat)
 print(automat)
