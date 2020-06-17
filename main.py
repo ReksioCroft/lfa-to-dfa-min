@@ -118,6 +118,17 @@ def nfa_to_dfa(automat):
 
 
 def min_dfa(automat):
+    # Pre-request: adaugam stare dead-end pt completarea tranzitilor
+    automat[2].append(dict())
+    for ch in automat[1]:
+        automat[2][-1][ch] = [automat[0]]
+    for i in range(automat[0]):
+        for ch in automat[1]:
+            if len(automat[2][i][ch]) == 0:
+                automat[2][i][ch] = [automat[0]]
+    automat[0] += 1
+
+    # Pasul 3.1: determinare stari echivalente
     echiv = [[True for j in range(i)] for i in range(automat[0])]
 
     for i in range(automat[0]):
